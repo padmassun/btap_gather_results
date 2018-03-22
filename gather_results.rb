@@ -101,13 +101,18 @@ def gather_output_results(aid, num_cores=1)
     unless (exclusion_list.include? dp) || (missing_dps.include? dp)
       puts dp
       uuid = dp
-      zip_file = File.join(basepath, assetids[dp], 'files', 'original', 'data_point.zip')
+      #OSW file name
       osw_file = File.join(basepath, assetids[dp], 'files', 'original', 'out.osw')
+      #The folder path with the UUID of the datapoint in the path. 
       write_dir = File.join(resultspath, dp)
+      #Makes the folder for the datapoint. 
       FileUtils.mkdir_p write_dir unless Dir.exists? write_dir
+      #Gets the basename from the full path of of the osw file (Should always be out.osw) 
       osw_basename = File.basename(osw_file)
+      #Create the new osw file name name. 
       new_osw = "#{write_dir}/#{osw_basename}"
       puts new_osw
+      #This is the copy command to copy the osw_file to the new results folder. 
       FileUtils.cp(osw_file,"#{write_dir}/#{osw_basename}")
     end
   end
