@@ -43,7 +43,8 @@ def gather_output_results(aid, num_cores=1)
   unless Dir.exists? basepath
     fail "ERROR: Unable to find base data point path #{basepath}"
   end
-  resultspath = "/mnt/results/#{aid}"
+  resultspath = "/mnt/results/#{aid}/"
+  puts "creating results folder #{resultspath}"
   unless Dir.exists? resultspath
     FileUtils.mkdir_p resultspath
   end
@@ -62,16 +63,17 @@ def gather_output_results(aid, num_cores=1)
   dps.each do |dp|
     begin
       dp_res_files = JSON.parse(RestClient.get("http://web:80/data_points/#{dp}.json", headers={}))['data_point']['result_files']
+      puts dp_res_files
       if dp_res_files.nil?
         puts "Unable to find related files for data point #{dp}"
       else
-        zips = dp_res_files.select { |file| file['attachment_content_type'] == 'application/zip' }
-        if zips.empty?
-          puts "No zip files found attached to data point #{dp}"
-        elsif zips.length > 1
-          puts "More than one zip file is attached to data point #{dp}, skipping"
+        osws = dp_res_files.select { |file| file['attachment_file_name'] == "out.osw" }
+        if osws.empty?
+          puts "No osw files found attached to data point #{dp}"
+        elsif osws.length > 1
+          puts "More than one osw file is attached to data point #{dp}, skipping"
         else
-          assetids[dp] = zips[0]['_id']['$oid']
+          assetids[dp] = osws[0]['_id']['$oid']
         end
       end
     rescue RestClient::ExceptionWithResponse
@@ -94,13 +96,19 @@ def gather_output_results(aid, num_cores=1)
 
   # Only download datapoints which do not already exist
   exclusion_list = Dir.entries resultspath
-  puts assetids.keys
+  
   assetids.keys.each do |dp|
     unless (exclusion_list.include? dp) || (missing_dps.include? dp)
+      puts dp
+      uuid = dp
       zip_file = File.join(basepath, assetids[dp], 'files', 'original', 'data_point.zip')
+      osw_file = File.join(basepath, assetids[dp], 'files', 'original', 'out.osw')
       write_dir = File.join(resultspath, dp)
-      Dir.mkdir write_dir unless Dir.exists? write_dir
-      unzip_archive zip_file, write_dir
+      FileUtils.mkdir_p write_dir unless Dir.exists? write_dir
+      osw_basename = File.basename(osw_file)
+      new_osw = "#{write_dir}/#{osw_basename}"
+      puts new_osw
+      FileUtils.cp(osw_file,"#{write_dir}/#{osw_basename}")
     end
   end
 end
