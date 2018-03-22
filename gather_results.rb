@@ -138,7 +138,7 @@ fail 'analysis UUID not specified' if options[:analysis_id].nil?
 fail 'enter a number of avaialble cores greater than zero' if options[:num_cores].to_i == 0
 
 # Gather the required files
-#Zip.warn_invalid_date = false
+Zip.warn_invalid_date = false
 gather_output_results(options[:analysis_id], options[:num_cores])
 
 # Finish up
