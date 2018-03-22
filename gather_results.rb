@@ -43,7 +43,7 @@ def gather_output_results(aid, num_cores=1)
   unless Dir.exists? basepath
     fail "ERROR: Unable to find base data point path #{basepath}"
   end
-  resultspath = "/mnt/results/#{aid}/"
+  resultspath = "/mnt/openstudio/server/assets/results/#{aid}/"
   puts "creating results folder #{resultspath}"
   unless Dir.exists? resultspath
     FileUtils.mkdir_p resultspath
