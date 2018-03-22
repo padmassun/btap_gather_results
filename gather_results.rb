@@ -12,6 +12,7 @@ require 'fileutils'
 require 'zip'
 require 'parallel'
 require 'optparse'
+require 'json'
 
 # Unzip an archive to a destination directory using Rubyzip gem
 #
@@ -93,7 +94,8 @@ def gather_output_results(aid, num_cores=1)
 
   # Only download datapoints which do not already exist
   exclusion_list = Dir.entries resultspath
-  Parallel.each(assetids.keys, progress: 'Assembled:', in_processes: (num_cores * 2)) do |dp|
+  puts assetids.keys
+  assetids.keys.each do |dp|
     unless (exclusion_list.include? dp) || (missing_dps.include? dp)
       zip_file = File.join(basepath, assetids[dp], 'files', 'original', 'data_point.zip')
       write_dir = File.join(resultspath, dp)
@@ -136,7 +138,7 @@ fail 'analysis UUID not specified' if options[:analysis_id].nil?
 fail 'enter a number of avaialble cores greater than zero' if options[:num_cores].to_i == 0
 
 # Gather the required files
-Zip.warn_invalid_date = false
+#Zip.warn_invalid_date = false
 gather_output_results(options[:analysis_id], options[:num_cores])
 
 # Finish up
