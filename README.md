@@ -38,12 +38,19 @@ Change the permissions of your key from 0755 to either 400 or 600 so that it is 
 ```
 chmod 400 ec2_server_key.pem
 ```
-## Spreadsheet Method Starts Here & Continue PAT Method From Here
-Note: if using the spreadsheet method found here https://goo.gl/Ynnm6x then the `ec2_server_key.pem` file will be found in your `OpenStudio-analysis-spreadsheet` repository and you can continue the rest of the steps from this repository without having to change the permissions of the key.
+## Spreadsheet Method Starts Here
+
+Continue PAT Method from this point
+
+Note: if using the spreadsheet method found here https://goo.gl/Ynnm6x then the `ec2_server_key.pem` file will be found in the `OpenStudio-analysis-spreadsheet` repository and you can continue the rest of the steps from this repository without having to change the permissions of the key.
 
 To connect to the AWS OpenStudio-Server use the following command in your Docker container in the directory that contains your `ec2_server_key.pem`.
 
-`ssh -i ec2_server_key.pem ubuntu@ec2-xx-xxx-xxx-xx.compute-1.amazonaws.com` Where the `ec2-xx-xxx-xxx-xx` part of the command can be found in the URL of the AWS console tab in your web browser.
+```
+ssh -i ec2_server_key.pem ubuntu@ec2-xx-xxx-xxx-xx.compute-1.amazonaws.com
+```
+
+Where the `ec2-xx-xxx-xxx-xx` part of the command can be found in the URL of the AWS console tab in your web browser.
 
 <p align="center">
   <img src ="https://github.com/canmet-energy/btap_gather_results/blob/master/img/ec2Address.png" />
@@ -74,17 +81,21 @@ Type `docker ps` in the command line to list the Container ID Names running on t
 
 Use the container ID to enter the web server with the following command.
 
-`docker exec -it <containerID> /bin/bash`
+```
+docker exec -it <containerID> /bin/bash`
+```
 
-Your command line should be something like `root@xxxxxxxxxxxx:/opt/openstudio/server#`
+The command line should now look like `root@xxxxxxxxxxxx:/opt/openstudio/server#`.
 
-Clone this repository, that you are now reading, into the `/opt/openstudio/server` directory to have access to the `gather_results.rb` script and the required `Gemfile`.
+Clone this repository, the one you are reading now, into the `/opt/openstudio/server` directory to have access to the `gather_results.rb` script and the required `Gemfile`.
 
-`git clone https://github.com/canmet-energy/btap_gather_results.git`
+```
+git clone https://github.com/canmet-energy/btap_gather_results.git
+```
 
 *Note: You will be prompted to enter your Github username and password as this is a private repository in canmet-energy.  If you do not have permission to access this repository contact your supervisor to give you the required permission.*
 
-Once the `btap_gather_results` repository finishes cloning enter it and run `bundle install`
+Once the `btap_gather_results` repository finishes cloning enter it and run `bundle install` to install the required gems.
 
 i.e. `cd btap_gather_results && bundle install`
 
@@ -92,7 +103,9 @@ i.e. `cd btap_gather_results && bundle install`
 
 Inside of `btap_gather_results` enter the following command to execute the script and to begin downloading the results
 
-`bundle exec ruby gather_results.rb -a <analysisID>`
+```
+bundle exec ruby gather_results.rb -a <analysisID>
+```
   
 The analysis ID can be found by clicking `View Analysis` on the AWS console dashboard in your web browser and by examining the url.
 
@@ -109,26 +122,40 @@ where `XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX` is the analysis ID.
 
 The results folder, with the analysis ID as its name, will be in the following directory.
 
-`cd /mnt/openstudio/server/assets/results/`
+```
+cd /mnt/openstudio/server/assets/results/
+```
 
 *This is the same as `/var/lib/docker/volumes/osdata/_data/server/assets/results/` on the host machine.*
 
 Use `ls -1 | wc -l` to verify that the outputed number of folders corresponds to the total number of datapoints in the AWS dashboard.
 
-Type `exit` to go back into the host machine the prompt should now say `ubuntu@ip-xx-xx-xxx-xxx:~$`.
+Type `exit` to go back into the host machine. The prompt should now say `ubuntu@ip-xx-xx-xxx-xxx:~$`.
 
 Enter the following command to recursively copy the results into your present working directory.
 
-`sudo cp -R /var/lib/docker/volumes/osdata/_data/server/assets/results/ .`
+```
+sudo cp -R /var/lib/docker/volumes/osdata/_data/server/assets/results/ .
+```
 
 Next, create a tarball for the results.
 
-`sudo tar cvfz results.tar.gz results`
+```
+sudo tar cvfz results.tar.gz results
+```
 
 If using the terminal emulator terminator, right click to split the screen horizontally and navigate to `/home/osdev`.  Alternatively, open up a new instance of your terminal.
 
-from `/home/osdev/` execute the following command to copy the tarball to your current working directory `/home/osdev`.
+from `/home/osdev/` execute the following command to copy the tarball to your current working directory, `/home/osdev`.
 
-`scp -i ec2_server_key.pem ubuntu@ec2-54-167-123-13.compute-1.amazonaws.com:/home/ubuntu/results.tar.gz /home/osdev`
+```
+scp -i ec2_server_key.pem ubuntu@ec2-54-167-123-13.compute-1.amazonaws.com:/home/ubuntu/results.tar.gz /home/osdev
+```
 
-`ls` to verify that the `results.tar.gz` tarball has been downloaded and extract the results using `tar xvfz results.tar.gz`.
+`ls` to verify that the `results.tar.gz` tarball has been downloaded and extract the results using the following command.
+
+```
+tar xvfz results.tar.gz
+```
+
+
