@@ -6,7 +6,7 @@ A script that can be used to download and organize btap results from the AWS ser
 
 If you are using PAT for BTAP simulations:
 
-Start the PAT analysis with the PAT GUI.  This may take up to 10 minutes to begin.  An `ec2_server_key.pem` file will be automatically generated for you.  Click the `Run Entire Workflow` once the option to do so becomes available in order to start the analysis.  Click the View AWS Console button to view the progress of the analysis in your Internet browser.  This browser window will be necessary to have opened in future steps.  If the analysis has completed and you do not intend on running more simulations the workers may be terminated in order to save money.  As long as the OpenStudio-Server instance is running the results can be downloaded.
+Start the PAT analysis with the PAT GUI.  This may take up to 10 minutes to begin.  An `ec2_server_key.pem` file will be automatically generated for you when the cluster is started.  Click the `Run Entire Workflow` once the option to do so becomes available in order to start the analysis.  Click the View AWS Console button to view the progress of the analysis in your Internet browser.  This browser window will be necessary to have opened in future steps.  If the analysis has completed and you do not intend on running more simulations the workers may be terminated in order to save money.  As long as the OpenStudio-Server instance is running the results can be downloaded.
 
 Navigate to your local PAT projects directory and open your current PAT project.  Once inside navigate to 
 ```
@@ -60,37 +60,40 @@ Once the `btap_gather_results` repository finishes cloning enter it and run `bun
 
 *optional step to install nano to read and make changes to files if modifying files: `sudo apt-get update && sudo apt-get install nano`*
 
-Inside of `btap_gather_results' enter the following command to execute the script
+Inside of `btap_gather_results' enter the following command to execute the script and to begin downloading the results
 
 `bundle exec ruby gather_results.rb -a <analysisID>`
   
-The analysis ID can be found by clicking `View Analysis` on the AWS console dashboard in your web browser.
+The analysis ID can be found by clicking `View Analysis` on the AWS console dashboard in your web browser and by examining the url.
 
 `http://ec2-XXX-XXX-XXX-XXX.compute-1.amazonaws.com/analyses/XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX`
 
 where `XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX` is the analysis ID.
 
-
-
 IMAGE analysisID.png
 
-YOu 'll get in to the amazon server... then you will need to log into the docker container that is the running the webserver. TO find the server run 
+The results folder, with the analysis ID as its name, will be in the following directory.
 
-docker ps
+`cd /mnt/openstudio/server/assets/results/`
 
-You'll see a docker container running that looks like this. 
+*This is the same as `/var/lib/docker/volumes/osdata/_data/server/assets/results/` on the host machine.*
 
-osserver_web.
+Use `ls -1 | wc -l` to verify that the outputed number of folders corresponds to the total number of datapoints in the AWS dashboard.
 
-Use the Container id of the server to enter the web server
+Type `exit` to go back into the host machine the prompt should now say `ubuntu@ip-xx-xx-xxx-xxx:~$`.
 
-docker exec -it 2f12a47beedf /bin/bash
+Enter the following command to recursively copy the results into your present working directory.
 
-Once you are there, you can use git to clone this repository, then enter the repository and run 'bundle install' 
+`sudo cp -R /var/lib/docker/volumes/osdata/_data/server/assets/results/ .`
 
-you can run the script with 'bundle exec ruby gather_results.rb'
+Next, create a tarball for the results.
 
-You shoudl install Nano
-sudo apt-get update && sudo apt-get install nano
+`sudo tar cvfz results.tar.gz results`
 
+If using the terminal emulator terminator, right click to split the screen horizontally and navigate to `/home/osdev`.  Alternatively, open up a new instance of your terminal.
 
+from `/home/osdev/` execute the following command to copy the tarball to your current working directory `/home/osdev`.
+
+`scp -i ec2_server_key.pem ubuntu@ec2-54-167-123-13.compute-1.amazonaws.com:/home/ubuntu/results.tar.gz /home/osdev`
+
+`ls` to verify that the `results.tar.gz` tarball has been downloaded and extract the results using `tar xvfz results.tar.gz`.
