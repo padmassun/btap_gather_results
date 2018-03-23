@@ -6,7 +6,7 @@ A script that can be used to download and organize the btap results from the AWS
 
 [PAT Method Starts Here](https://github.com/canmet-energy/btap_gather_results#pat-method-starts-here)
 
-[Spreadsheet Method Starts Here](https://github.com/canmet-energy/btap_gather_results#spreadsheet-method-starts-here-&-continue-pat-method-from-here)
+[Spreadsheet Method Starts Here](https://github.com/canmet-energy/btap_gather_results#spreadsheet-method-starts-here)
 
 ## PAT Method Starts Here
 
