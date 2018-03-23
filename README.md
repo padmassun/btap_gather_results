@@ -2,11 +2,26 @@
 
 ## Introduction
 
-A script that can be used to download and organize btap results from the AWS server.
+A script that can be used to download and organize the btap results from the AWS OpenStudio-Server instance.
 
-If you are using PAT for BTAP simulations:
+[PAT Method Starts Here](https://github.com/canmet-energy/btap_gather_results#pat-method-starts-here)
 
-Start the PAT analysis with the PAT GUI.  This may take up to 10 minutes to begin.  An `ec2_server_key.pem` file will be automatically generated for you when the cluster is started.  Click the `Run Entire Workflow` once the option to do so becomes available in order to start the analysis.  Click the View AWS Console button to view the progress of the analysis in your Internet browser.  This browser window will be necessary to have opened in future steps.  If the analysis has completed and you do not intend on running more simulations the workers may be terminated in order to save money.  As long as the OpenStudio-Server instance is running the results can be downloaded.
+[Spreadsheet Method Starts Here](https://github.com/canmet-energy/btap_gather_results#spreadsheet-method-starts-here-&-continue-pat-method-from-here)
+
+## PAT Method Starts Here
+
+Start the PAT analysis with the PAT GUI.  This may take up to 10 minutes to begin.
+
+<p align="center">
+  <img src ="https://github.com/canmet-energy/btap_gather_results/blob/master/img/startPat.png" />
+  <br>
+  <b>Figure 1: OpenStudio-Server Web Address</b>
+  <br>
+</p>
+
+An `ec2_server_key.pem` file will be automatically generated when the cluster is started.  Click the `Run Entire Workflow` once the option to do so becomes available in order to start the analysis.  Click the `View AWS Console` button to view the progress of the analysis in your Internet browser.  
+
+*Note: This browser window will be necessary to have opened in future steps.  If the analysis has completed and you do not intend on running more simulations the workers may be terminated in order to save money.  As long as the OpenStudio-Server instance is running the results can be downloaded.*
 
 Navigate to your local PAT projects directory and open your current PAT project.  Once inside navigate to 
 ```
@@ -20,27 +35,42 @@ Copy the `ec2_server_key.pem` to your local Docker container in `/home/osdev/` o
 
 Change the permissions of your key from 0755 to either 400 or 600 so that it is not too open.
 
-`chmod 400 ec2_server_key.pem`
-
+```
+chmod 400 ec2_server_key.pem
+```
+## Spreadsheet Method Starts Here & Continue PAT Method From Here
 Note: if using the spreadsheet method found here https://goo.gl/Ynnm6x then the `ec2_server_key.pem` file will be found in your `OpenStudio-analysis-spreadsheet` repository and you can continue the rest of the steps from this repository without having to change the permissions of the key.
 
 To connect to the AWS OpenStudio-Server use the following command in your Docker container in the directory that contains your `ec2_server_key.pem`.
 
 `ssh -i ec2_server_key.pem ubuntu@ec2-xx-xxx-xxx-xx.compute-1.amazonaws.com` Where the `ec2-xx-xxx-xxx-xx` part of the command can be found in the URL of the AWS console tab in your web browser.
 
-IMAGE ec2Address.png
+<p align="center">
+  <img src ="https://github.com/canmet-energy/btap_gather_results/blob/master/img/ec2Address.png" />
+  <br>
+  <b>Figure 2: OpenStudio-Server Web Address</b>
+  <br>
+</p>
 
-IMAGE connectAWS2.png 
-
-When prompted with `Are you sure you want to continue connecting (yes/no)?` type `yes`.
-
-IMAGE connectAWS.png
+If prompted with `Are you sure you want to continue connecting (yes/no)?` type `yes`.
 
 You are now in the OpenStudio-Server and should see `ubuntu@ip-xx-xx-xx-xx:-$` as your command line.
 
+<p align="center">
+  <img src ="https://github.com/canmet-energy/btap_gather_results/blob/master/img/connectAWS2.png" />
+  <br>
+  <b>Figure 3: Connecting to the OpenStudio-Server</b>
+  <br>
+</p>
+
 Type `docker ps` in the command line to list the Container ID Names running on the OpenStudio-Server and look for the one called `osserver_web.1.xxxxxxxxxxxxxxxxxxxxxxxxx`.  There will be a 12 digit alphanumerical container ID that you will need right above `osserver_web.1.xxxxxxxxxxxxxxxxxxxxxxxxx`. Copy this ID into your buffer.
 
-IMAGE webContainerID.png
+<p align="center">
+  <img src ="https://github.com/canmet-energy/btap_gather_results/blob/master/img/webContainerID.png" />
+  <br>
+  <b>Figure 4: OS-Server Web Container</b>
+  <br>
+</p>
 
 Use the container ID to enter the web server with the following command.
 
@@ -48,19 +78,19 @@ Use the container ID to enter the web server with the following command.
 
 Your command line should be something like `root@xxxxxxxxxxxx:/opt/openstudio/server#`
 
-Clone this repository into the `/opt/openstudio/server` directory that you should currently be in to have access to the `gather_results.rb` script and the required `Gemfile`
+Clone this repository, that you are now reading, into the `/opt/openstudio/server` directory to have access to the `gather_results.rb` script and the required `Gemfile`.
 
 `git clone https://github.com/canmet-energy/btap_gather_results.git`
 
-You will be prompted to enter your Github username and password as this is a private repository in canmet-energy.  If you do not have permission to access this repository contact your supervisor to give you the required permission.
+*Note: You will be prompted to enter your Github username and password as this is a private repository in canmet-energy.  If you do not have permission to access this repository contact your supervisor to give you the required permission.*
 
 Once the `btap_gather_results` repository finishes cloning enter it and run `bundle install`
 
-`cd btap_gather_results && bundle install`
+i.e. `cd btap_gather_results && bundle install`
 
 *optional step to install nano to read and make changes to files if modifying files: `sudo apt-get update && sudo apt-get install nano`*
 
-Inside of `btap_gather_results' enter the following command to execute the script and to begin downloading the results
+Inside of `btap_gather_results` enter the following command to execute the script and to begin downloading the results
 
 `bundle exec ruby gather_results.rb -a <analysisID>`
   
@@ -70,7 +100,12 @@ The analysis ID can be found by clicking `View Analysis` on the AWS console dash
 
 where `XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX` is the analysis ID.
 
-IMAGE analysisID.png
+<p align="center">
+  <img src ="https://github.com/canmet-energy/btap_gather_results/blob/master/img/analysisID.png" />
+  <br>
+  <b>Figure 5: Analysis ID</b>
+  <br>
+</p>
 
 The results folder, with the analysis ID as its name, will be in the following directory.
 
