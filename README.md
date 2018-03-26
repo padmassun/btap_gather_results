@@ -82,7 +82,7 @@ Type `docker ps` in the command line to list the Container ID Names running on t
 Use the container ID to enter the web server with the following command.
 
 ```
-docker exec -it <containerID> /bin/bash`
+docker exec -it <containerID> /bin/bash
 ```
 
 The command line should now look like `root@xxxxxxxxxxxx:/opt/openstudio/server#`.
@@ -128,7 +128,8 @@ cd /mnt/openstudio/server/assets/results/
 
 *This is the same as `/var/lib/docker/volumes/osdata/_data/server/assets/results/` on the host machine.*
 
-Use `ls -1 | wc -l` to verify that the outputed number of folders corresponds to the total number of datapoints in the AWS dashboard.
+There will be one folder with the analysis ID in this directory.  Go into the analysis results folder and use 
+`ls -1 | wc -l` to verify that the outputed number of folders corresponds to the total number of datapoints in the AWS dashboard.
 
 Type `exit` to go back into the host machine. The prompt should now say `ubuntu@ip-xx-xx-xxx-xxx:~$`.
 
@@ -149,7 +150,7 @@ If using the terminal emulator terminator, right click to split the screen horiz
 from `/home/osdev/` execute the following command to copy the tarball to your current working directory, `/home/osdev`.
 
 ```
-scp -i ec2_server_key.pem ubuntu@ec2-54-167-123-13.compute-1.amazonaws.com:/home/ubuntu/results.tar.gz /home/osdev
+scp -i ec2_server_key.pem ubuntu@ec2-xx-xxx-xxx-xx.compute-1.amazonaws.com:/home/ubuntu/results.tar.gz /home/osdev
 ```
 
 `ls` to verify that the `results.tar.gz` tarball has been downloaded and extract the results using the following command.
