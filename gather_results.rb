@@ -44,6 +44,7 @@ def gather_output_results(aid, num_cores=1)
     fail "ERROR: Unable to find base data point path #{basepath}"
   end
   resultspath = "/mnt/openstudio/server/assets/results/#{aid}/"
+  outputpath = "/mnt/openstudio/server/assets/results/"
   puts "creating results folder #{resultspath}"
   unless Dir.exists? resultspath
     FileUtils.mkdir_p resultspath
@@ -114,6 +115,176 @@ def gather_output_results(aid, num_cores=1)
       puts new_osw
       #This is the copy command to copy the osw_file to the new results folder. 
       FileUtils.cp(osw_file,"#{write_dir}/#{osw_basename}")
+
+      results = JSON.parse(File.read(osw_file))
+
+      # change the output folder directory based on building_type and climate_zone
+      # get building_type and climate_zone from create_prototype_building measure if it exists
+      results['steps'].each do |measure|
+        next unless measure["name"] == "create_prototype_building"
+        #template = measure["arguments"]["template"]
+        building_type = measure["arguments"]["building_type"]
+        #climate_zone = measure["arguments"]["climate_zone"]
+        #remove the .epw suffix
+        epw_file = measure["arguments"]["epw_file"].gsub(/\.epw/,"")
+        output_folder = "#{outputpath}/output/#{building_type}/#{epw_file}"
+        #puts output_folder
+        FileUtils.mkdir_p(output_folder)
+      end
+       
+         #parse the downloaded osw files and check if the datapoint failed or not
+      #if failed download the eplusout.err and sldp_log files for error logging
+      failed_log_folder = "#{output_folder}/failed_run_logs"
+      check_and_log_error(results,outputpath,uuid,failed_log_folder)
+
+      #itterate through all the steps of the osw file
+          results['steps'].each do |measure|
+            #puts "measure.name: #{measure['name']}"
+            found_osm = false
+            found_json = false
+
+            # if the measure is openstudioresults, then download the eplustbl.htm and the pretty report [report.html]
+            if measure["name"] == "openstudioresults" && measure.include?("result")
+              measure["result"]["step_values"].each do |values|
+                # extract the eplustbl.html blob data from the osw file and save it
+                # in the output folder
+                if values["name"] == 'eplustbl_htm'
+                  eplustbl_htm_zip = values['value']
+                  eplustbl_htm_string =  Zlib::Inflate.inflate(Base64.strict_decode64( eplustbl_htm_zip ))
+                  FileUtils.mkdir_p("#{output_folder}/eplus_table")
+                  File.open("#{output_folder}/eplus_table/#{uuid}-eplustbl.htm", 'wb') {|f| f.write(eplustbl_htm_string) }
+                  #puts "#{uuid}-eplustbl.htm ok"
+                end
+                # extract the pretty report.html blob data from the osw file and save it
+                # in the output folder
+                if values["name"] == 'report_html'
+                  report_html_zip = values['value']
+                  report_html_string =  Zlib::Inflate.inflate(Base64.strict_decode64( report_html_zip ))
+                  FileUtils.mkdir_p("#{output_folder}/os_report")
+                  File.open("#{output_folder}/os_report/#{uuid}-os-report.html", 'wb') {|f| f.write(report_html_string) }
+                  #puts "#{uuid}-os-report.html ok"
+                end
+              end
+            end
+
+            # if the measure is view_model, then extract the 3d.html model and save it
+            if measure["name"] == "view_model" && measure.include?("result")
+              measure["result"]["step_values"].each do |values|
+                if values["name"] == 'view_model_html_zip'
+                  view_model_html_zip = values['value']
+                  view_model_html =  Zlib::Inflate.inflate(Base64.strict_decode64( view_model_html_zip ))
+                  FileUtils.mkdir_p("#{output_folder}/3d_model")
+                  File.open("#{output_folder}/3d_model/#{uuid}_3d.html", 'wb') {|f| f.write(view_model_html) }
+                  #puts "#{uuid}-eplustbl.htm ok"
+                end
+              end
+            end
+
+            # if the measure is btapresults, then extract the osw file and qaqc json
+            # While processing the qaqc json file, add it to the simulations.json file
+            if measure["name"] == "btapresults" && measure.include?("result")
+              measure["result"]["step_values"].each do |values|
+                # extract the model_osm_zip blob data from the osw file and save it
+                # in the output folder
+                if values["name"] == 'model_osm_zip'
+                  found_osm = true
+                  model_osm_zip = values['value']
+                  osm_string =  Zlib::Inflate.inflate(Base64.strict_decode64( model_osm_zip ))
+                  FileUtils.mkdir_p("#{output_folder}/osm_files")
+                  File.open("#{output_folder}/osm_files/#{uuid}.osm", 'wb') {|f| f.write(osm_string) }
+                  #puts "#{uuid}.osm ok"
+                end
+
+                # extract the btap_results_hourly_data_8760 blob data from the osw file and save it
+                # in the output folder
+                if values["name"] == 'btap_results_hourly_data_8760'
+                  model_osm_zip = values['value']
+                  osm_string =  Zlib::Inflate.inflate(Base64.strict_decode64( model_osm_zip ))
+                  FileUtils.mkdir_p("#{output_folder}/8760_files")
+                  File.open("#{output_folder}/8760_files/#{uuid}-8760_hourly_data.csv", 'w+') {|f| f.write(osm_string) }
+                  #puts "#{uuid}.osm ok"
+                end
+
+                # extract the btap_results_hourly_custom_8760 blob data from the osw file and save it
+                # in the output folder
+                if values["name"] == 'btap_results_hourly_custom_8760'
+                  model_osm_zip = values['value']
+                  osm_string =  Zlib::Inflate.inflate(Base64.strict_decode64( model_osm_zip ))
+                  FileUtils.mkdir_p("#{output_folder}/8760_files")
+                  File.open("#{output_folder}/8760_files/#{uuid}-8760_hour_custom.csv", 'w+') {|f| f.write(osm_string) }
+                  #puts "#{uuid}.osm ok"
+                end
+
+                # extract the btap_results_monthly_7_day_24_hour_averages blob data from the osw file and save it
+                # in the output folder
+                if values["name"] == 'btap_results_monthly_7_day_24_hour_averages'
+                  model_osm_zip = values['value']
+                  osm_string =  Zlib::Inflate.inflate(Base64.strict_decode64( model_osm_zip ))
+                  FileUtils.mkdir_p("#{output_folder}/8760_files")
+                  File.open("#{output_folder}/8760_files/#{uuid}-mnth_24_hr_avg.csv", 'w+') {|f| f.write(osm_string) }
+                  #puts "#{uuid}.osm ok"
+                end
+
+                # extract the btap_results_monthly_24_hour_weekend_weekday_averages blob data from the 
+                #osw file and save it in the output folder
+                if values["name"] == 'btap_results_monthly_24_hour_weekend_weekday_averages'
+                  model_osm_zip = values['value']
+                  osm_string =  Zlib::Inflate.inflate(Base64.strict_decode64( model_osm_zip ))
+                  FileUtils.mkdir_p("#{output_folder}/8760_files")
+                  File.open("#{output_folder}/8760_files/#{uuid}-mnth_weekend_weekday.csv", 'w+') {|f| f.write(osm_string) }
+                  #puts "#{uuid}.osm ok"
+                end
+
+                # extract the btap_results_enduse_total_24_hour_weekend_weekday_averages blob data 
+                # from the osw file and save it in the output folder
+                if values["name"] == 'btap_results_enduse_total_24_hour_weekend_weekday_averages'
+                  model_osm_zip = values['value']
+                  osm_string =  Zlib::Inflate.inflate(Base64.strict_decode64( model_osm_zip ))
+                  FileUtils.mkdir_p("#{output_folder}/8760_files")
+                  File.open("#{output_folder}/8760_files/#{uuid}-endusetotal.csv", 'w+') {|f| f.write(osm_string) }
+                  #puts "#{uuid}.osm ok"
+                end
+
+
+                # extract the qaqc json blob data from the osw file and save it
+                # in the output folder
+                if values["name"] == 'btap_results_json_zip'
+                  found_json = true
+                  btap_results_json_zip = values['value']
+                  json_string =  Zlib::Inflate.inflate(Base64.strict_decode64( btap_results_json_zip ))
+                  json = JSON.parse(json_string)
+                  # indicate if the current model is a baseline run or not
+                  json['is_baseline'] = "#{flags[:baseline]}"
+
+                  #add ECM data to the json file
+                  measure_data = []
+                  results['steps'].each_with_index do |measure, index|
+                    step = {}
+                    measure_data << step
+                    step['name'] = measure['name']
+                    step['arguments'] = measure['arguments']
+                    if measure.has_key?('result')
+                      step['display_name'] = measure['result']['measure_display_name']
+                      step['measure_class_name'] = measure['result']['measure_class_name']
+                    end
+                    step['index'] = index
+                    # measure is an ecm if it starts with ecm_ (case ignored)
+                    step['is_ecm'] = !(measure['name'] =~ /^ecm_/i).nil? # returns true if measure name starts with 'ecm_' (case ignored)
+                  end
+
+                  json['measures'] = measure_data
+
+                  FileUtils.mkdir_p("#{output_folder}/qaqc_files")
+                  File.open("#{output_folder}/qaqc_files/#{uuid}.json", 'wb') {|f| f.write(JSON.pretty_generate(json)) }
+
+                  # append qaqc data to simulations.json
+                  process_simulation_json(json,simulations_json_folder, uuid)
+                  puts "#{uuid}.json ok"
+                end # values["name"] == 'btap_results_json_zip'
+              end
+            end # if measure["name"] == "btapresults" && measure.include?("result")
+          end # of grab step files
+
     end
   end
 end
