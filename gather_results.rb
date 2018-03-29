@@ -43,7 +43,7 @@ def gather_output_results(aid, num_cores=1)
   unless Dir.exists? basepath
     fail "ERROR: Unable to find base data point path #{basepath}"
   end
-  resultspath = "/mnt/openstudio/server/assets/results/#{aid}/"
+  resultspath = "/mnt/openstudio/server/assets/results/osw_files/"
   outputpath = "/mnt/openstudio/server/assets/results/"
 
   simulations_json_folder = outputpath
@@ -146,7 +146,7 @@ File.open("#{simulations_json_folder}/simulations.json", 'w'){}
          #parse the downloaded osw files and check if the datapoint failed or not
       #if failed download the eplusout.err and sldp_log files for error logging
       failed_log_folder = "#{output_folder}/failed_run_logs"
-      check_and_log_error(results,outputpath,uuid,failed_log_folder)
+     # check_and_log_error(results,outputpath,uuid,failed_log_folder)
 
       #itterate through all the steps of the osw file
           results['steps'].each do |measure|
