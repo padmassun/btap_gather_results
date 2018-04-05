@@ -13,6 +13,7 @@ require 'zip'
 require 'parallel'
 require 'optparse'
 require 'json'
+require 'base64'
 
 # Unzip an archive to a destination directory using Rubyzip gem
 #
@@ -155,7 +156,7 @@ File.open("#{simulations_json_folder}/simulations.json", 'w'){}
             found_json = false
 
             # if the measure is openstudioresults, then download the eplustbl.htm and the pretty report [report.html]
-            if measure["name"] == "openstudioresults" && measure.include?("result")
+            if measure["name"] == "openstudio_results" && measure.include?("result")
               measure["result"]["step_values"].each do |values|
                 # extract the eplustbl.html blob data from the osw file and save it
                 # in the output folder
@@ -179,7 +180,7 @@ File.open("#{simulations_json_folder}/simulations.json", 'w'){}
             end
 
             # if the measure is view_model, then extract the 3d.html model and save it
-            if measure["name"] == "view_model" && measure.include?("result")
+            if measure["name"] == "btap_view_model" && measure.include?("result")
               measure["result"]["step_values"].each do |values|
                 if values["name"] == 'view_model_html_zip'
                   view_model_html_zip = values['value']
@@ -193,7 +194,7 @@ File.open("#{simulations_json_folder}/simulations.json", 'w'){}
 
             # if the measure is btapresults, then extract the osw file and qaqc json
             # While processing the qaqc json file, add it to the simulations.json file
-            if measure["name"] == "btapresults" && measure.include?("result")
+            if measure["name"] == "btap_results" && measure.include?("result")
               measure["result"]["step_values"].each do |values|
                 # extract the model_osm_zip blob data from the osw file and save it
                 # in the output folder
