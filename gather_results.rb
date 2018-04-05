@@ -128,11 +128,11 @@ File.open("#{simulations_json_folder}/simulations.json", 'w'){}
       FileUtils.cp(osw_file,"#{write_dir}/#{osw_basename}")
 
       results = JSON.parse(File.read(osw_file))
-
+     
       # change the output folder directory based on building_type and climate_zone
       # get building_type and climate_zone from create_prototype_building measure if it exists
       results['steps'].each do |measure|
-        next unless measure["name"] == "create_prototype_building"
+        next unless measure["name"] == "btap_create_necb_prototype_building"
         #template = measure["arguments"]["template"]
         building_type = measure["arguments"]["building_type"]
         #climate_zone = measure["arguments"]["climate_zone"]
