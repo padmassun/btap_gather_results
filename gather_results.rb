@@ -48,14 +48,15 @@ def gather_output_results(aid, num_cores=1)
   outputpath = "/mnt/openstudio/server/assets/results/"
 
   simulations_json_folder = outputpath
-FileUtils.mkdir_p(outputpath)
-osw_folder = "#{outputpath}/osw_files"
-FileUtils.mkdir_p(osw_folder)
-output_folder = "#{outputpath}/output"
-FileUtils.mkdir_p(output_folder)
-File.open("#{outputpath}/missing_files.log", 'wb') { |f| f.write("") }
-File.open("#{outputpath}/missing_files.log", 'w') {|f| f.write("") }
-File.open("#{simulations_json_folder}/simulations.json", 'w'){}
+  
+  FileUtils.mkdir_p(outputpath)
+  osw_folder = "#{outputpath}/osw_files"
+  FileUtils.mkdir_p(osw_folder)
+  output_folder = "#{outputpath}/output"
+  FileUtils.mkdir_p(output_folder)
+  File.open("#{outputpath}/missing_files.log", 'wb') { |f| f.write("") }
+  File.open("#{outputpath}/missing_files.log", 'w') {|f| f.write("") }
+  File.open("#{simulations_json_folder}/simulations.json", 'w'){}
 
   puts "creating results folder #{resultspath}"
   unless Dir.exists? resultspath
