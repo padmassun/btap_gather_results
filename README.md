@@ -131,18 +131,20 @@ cd /mnt/openstudio/server/assets/results/
 There will be one folder with the analysis ID in this directory.  Go into the analysis results folder and use 
 `ls -1 | wc -l` to verify that the outputed number of folders corresponds to the total number of datapoints in the AWS dashboard.
 
+Next, create a tarball for the results.
+
+```
+sudo tar cvfz results.tar.gz results
+```
+
+You may delete the results folder if there is insufficienct storage space on server `rm -rf results`
+
 Type `exit` to go back into the host machine. The prompt should now say `ubuntu@ip-xx-xx-xxx-xxx:~$`.
 
 Enter the following command to recursively copy the results into your present working directory.
 
 ```
-sudo cp -R /var/lib/docker/volumes/osdata/_data/server/assets/results/ .
-```
-
-Next, create a tarball for the results.
-
-```
-sudo tar cvfz results.tar.gz results
+sudo cp -R /var/lib/docker/volumes/osdata/_data/server/assets/results.tar.gz/ .
 ```
 
 If using the terminal emulator terminator, right click to split the screen horizontally and navigate to `/home/osdev`.  Alternatively, open up a new instance of your terminal.
