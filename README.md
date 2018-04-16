@@ -144,7 +144,7 @@ Type `exit` to go back into the host machine. The prompt should now say `ubuntu@
 Enter the following command to recursively copy the results into your present working directory.
 
 ```
-sudo cp -R /var/lib/docker/volumes/osdata/_data/server/assets/results.tar.gz/ .
+sudo cp -R /var/lib/docker/volumes/osdata/_data/server/assets/results.tar.gz .
 ```
 
 If using the terminal emulator terminator, right click to split the screen horizontally and navigate to `/home/osdev`.  Alternatively, open up a new instance of your terminal.
