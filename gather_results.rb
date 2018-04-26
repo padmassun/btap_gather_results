@@ -307,7 +307,7 @@ def get_log_file (analysis_id, data_point_id, save_directory = '.')
   file_path_and_name = nil
   unless analysis_id.nil?
     data_points = nil
-    resp = conn.get "analyses/#{analysis_id}/status.json"
+    resp = @conn.get "analyses/#{analysis_id}/status.json"
     puts "status.json OK".green
     if resp.status == 200
       data_points = JSON.parse(resp.body)['analysis']['data_points']
@@ -315,7 +315,7 @@ def get_log_file (analysis_id, data_point_id, save_directory = '.')
       data_points.each do |dp|
         next unless dp['_id'] == data_point_id
         puts "Checking #{dp['_id']}: Status: #{dp["status_message"]}".green
-        log_resp = conn.get "data_points/#{dp['_id']}.json"
+        log_resp = @conn.get "data_points/#{dp['_id']}.json"
         if log_resp.status == 200
           sdp_log_file = JSON.parse(log_resp.body)['data_point']['sdp_log_file']
           file_path_and_name = "#{save_directory}/#{dp['_id']}-sdp.log"
