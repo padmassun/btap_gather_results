@@ -114,7 +114,6 @@ def gather_output_results(aid, num_cores=1)
   
   assetids.keys.each do |dp|
     unless (exclusion_list.include? dp) || (missing_dps.include? dp)
-      puts JSON.pretty_generate(dp)
       uuid = dp
       #OSW file name
       osw_file = File.join(basepath, assetids[dp], 'files', 'original', 'out.osw')
@@ -417,9 +416,9 @@ def get_log_file (analysis_id, data_point_id, save_directory = '.')
     puts "status.json OK".green
     puts resp.class.name
     if true #resp.status == 200
-      data_points = JSON.parse(resp)['analysis']['data_points']
-      puts JSON.pretty_generate(data_points)
-      data_points = resp['analysis']['data_points']
+      array = JSON.parse(resp)
+      puts JSON.pretty_generate(array)
+      data_points = array['analysis']['data_points']
       data_points.each do |dp|
         next unless dp['_id'] == data_point_id
         puts "Checking #{dp['_id']}: Status: #{dp["status_message"]}".green
