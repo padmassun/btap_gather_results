@@ -422,7 +422,7 @@ def get_log_file (analysis_id, data_point_id, save_directory = '.')
       data_points.each do |dp|
         next unless dp['_id'] == data_point_id
         puts "Checking #{dp['_id']}: Status: #{dp["status_message"]}".green
-        log_resp = RestClient.get("http://web:80/data_point/#{dp['_id']}.json", headers={})
+        log_resp = RestClient.get("http://web:80/data_point/#{dp['_id']}.json", headers={:accept => :json})
         #log_resp = @conn.get "data_points/#{dp['_id']}.json"
         if log_resp.code == 200
           sdp_log_file = JSON.parse(log_resp.body)['data_point']['sdp_log_file']
