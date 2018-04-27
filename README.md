@@ -95,9 +95,11 @@ git clone https://github.com/canmet-energy/btap_gather_results.git
 
 *Note: You will be prompted to enter your Github username and password as this is a private repository in canmet-energy.  If you do not have permission to access this repository contact your supervisor to give you the required permission.*
 
-Once the `btap_gather_results` repository finishes cloning enter it and run `bundle install` to install the required gems.
+Once the `btap_gather_results` repository finishes cloning enter it and run `bundle install` to install the required gems or use:
 
-i.e. `cd btap_gather_results && bundle install`
+```
+cd btap_gather_results && bundle install`
+```
 
 *optional step to install nano to read and make changes to files if modifying files: `sudo apt-get update && sudo apt-get install nano`*
 
