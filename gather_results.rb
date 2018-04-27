@@ -415,7 +415,7 @@ def get_log_file (analysis_id, data_point_id, save_directory = '.')
     resp =  RestClient.get("http://web:80/analyses/#{analysis_id}/status.json", headers={})
     #resp = @conn.get "analyses/#{analysis_id}/status.json"
     puts "status.json OK".green
-    puts resp
+    puts JSON.pretty_generate(resp)
     puts resp.class.name
     if true #resp.status == 200
       #data_points = JSON.parse(resp.body)['analysis']['data_points']
@@ -425,8 +425,9 @@ def get_log_file (analysis_id, data_point_id, save_directory = '.')
         puts "Checking #{dp['_id']}: Status: #{dp["status_message"]}".green
         log_resp = JSON.parse RestClient.get("http://web:80/data_point/#{dp['_id']}.json", headers={})
         #log_resp = @conn.get "data_points/#{dp['_id']}.json"
-        if log_resp.status == 200
-          sdp_log_file = JSON.parse(log_resp.body)['data_point']['sdp_log_file']
+        if true #log_resp.status == 200
+          #sdp_log_file = JSON.parse(log_resp.body)['data_point']['sdp_log_file']
+          sdp_log_file = JSON.parse(log_resp)['data_point']['sdp_log_file']
           file_path_and_name = "#{save_directory}/#{dp['_id']}-sdp.log"
           File.open(file_path_and_name, 'wb') { |f|
             sdp_log_file.each { |line| f.puts "#{line}"  }
