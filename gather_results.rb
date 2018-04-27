@@ -14,6 +14,7 @@ require 'parallel'
 require 'optparse'
 require 'json'
 require 'base64'
+require 'colored'
 
 # Unzip an archive to a destination directory using Rubyzip gem
 #
@@ -148,7 +149,7 @@ def gather_output_results(aid, num_cores=1)
          #parse the downloaded osw files and check if the datapoint failed or not
       #if failed download the eplusout.err and sldp_log files for error logging
       failed_log_folder = "#{output_folder}/failed_run_logs"
-      check_and_log_error(results,outputpath,uuid,failed_log_folder)
+      check_and_log_error(results,outputpath,uuid,failed_log_folder, aid)
 
       #itterate through all the steps of the osw file
           results['steps'].each do |measure|
@@ -310,7 +311,7 @@ end
 # @param output_folder [:string] root folder where the csv log needs to be created
 # @param uuid [:string] uuid of the datapoint. used to download the sdp log file if the datapoint has failed
 # @param failed_output_folder [:string] root folder of the sdp log files
-def check_and_log_error(results,output_folder,uuid,failed_output_folder)
+def check_and_log_error(results,output_folder,uuid,failed_output_folder, aid)
   if results['completed_status'] == "Fail"
     FileUtils.mkdir_p(failed_output_folder) # create failed_output_folder
     log_k, log_f = get_log_file("a9814f91-69e0-4e19-b55d-a68fadd7d17c", uuid, failed_output_folder)
