@@ -412,12 +412,14 @@ def get_log_file (analysis_id, data_point_id, save_directory = '.')
   file_path_and_name = nil
   unless analysis_id.nil?
     data_points = nil
-    resp = JSON.parse RestClient.get("http://web:80/analyses/#{analysis_id}/status.json", headers={})
+    resp =  RestClient.get("http://web:80/analyses/#{analysis_id}/status.json", headers={})
     #resp = @conn.get "analyses/#{analysis_id}/status.json"
     puts "status.json OK".green
+    puts resp
+    puts resp.class.name
     if resp.status == 200
       data_points = JSON.parse(resp.body)['analysis']['data_points']
-      #data_points.each do |dp|
+
       data_points.each do |dp|
         next unless dp['_id'] == data_point_id
         puts "Checking #{dp['_id']}: Status: #{dp["status_message"]}".green
