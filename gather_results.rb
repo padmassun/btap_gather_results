@@ -313,7 +313,7 @@ end
 def check_and_log_error(results,output_folder,uuid,failed_output_folder)
   if results['completed_status'] == "Fail"
     FileUtils.mkdir_p(failed_output_folder) # create failed_output_folder
-    log_k, log_f = @server_api.get_log_file(@analysis_id, uuid, failed_output_folder)
+    log_k, log_f = get_log_file("a9814f91-69e0-4e19-b55d-a68fadd7d17c", uuid, failed_output_folder)
     # log_k => Boolean which determines if the log file has been downloaded successfully
     # log_f => path of the downloaded log file
 
@@ -398,6 +398,45 @@ def process_simulation_json(json,simulations_json_folder,uuid)
     f.flock(File::LOCK_UN)
   }
 end
+
+# This method will download the status of the entire analysis which includes the datapoint
+# status such as "completed normal" or "datapoint failure"
+#
+# @param datapoint_id [:string] Datapoint ID
+# @param file_name [:string] Filename to be downloaded for the datapoint, with extension
+# @param save_directory [:string] path of output location, without filename extension
+# @return [downloaded, file_path_and_name] [:array]: [downloaded] boolean - true if download is successful; [file_path_and_name] String path and file name of the downloaded file with extension
+def get_log_file (analysis_id, data_point_id, save_directory = '.')
+  downloaded = false
+  file_path_and_name = nil
+  unless analysis_id.nil?
+    data_points = nil
+    resp = JSON.parse RestClient.get("http://web:80/analyses/#{aid}/status.json", headers={})
+    #resp = @conn.get "analyses/#{analysis_id}/status.json"
+    puts "status.json OK".green
+    if resp.status == 200
+      data_points = JSON.parse(resp.body)['analysis']['data_points']
+      #data_points.each do |dp|
+      data_points.each do |dp|
+        next unless dp['_id'] == data_point_id
+        puts "Checking #{dp['_id']}: Status: #{dp["status_message"]}".green
+        log_resp = JSON.parse RestClient.get("http://web:80/data_point/#{dp['_id']}.json", headers={})
+        #log_resp = @conn.get "data_points/#{dp['_id']}.json"
+        if log_resp.status == 200
+          sdp_log_file = JSON.parse(log_resp.body)['data_point']['sdp_log_file']
+          file_path_and_name = "#{save_directory}/#{dp['_id']}-sdp.log"
+          File.open(file_path_and_name, 'wb') { |f|
+            sdp_log_file.each { |line| f.puts "#{line}"  }
+          }
+          downloaded = true
+        else
+          puts log_resp
+        end
+      end
+    end
+  end
+  return [downloaded, file_path_and_name]
+end #get_log_file
 
 
 # Initialize optionsParser ARGV hash
